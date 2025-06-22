@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+langchain
+openai
+googlemaps
+geopy
+folium
+polyline
+python-dotenv
+rapidfuzz
+speechrecognition
+pyttsx3
+pydantic
+gtts
+pygame
+pyaudio
