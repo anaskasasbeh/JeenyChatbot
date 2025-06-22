@@ -100,7 +100,6 @@ JeenyChatbot/
 │
 ├── requirements.txt
 ├── .env.example
-├── .gitignore
 └── README.md
 ```
 
