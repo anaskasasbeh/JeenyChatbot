@@ -165,7 +165,7 @@ Contributions are welcome! Please fork the repository, create your branch, commi
 
 ## 📜 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [(https://github.com/anaskasasbeh28/JeenyChatbot?tab=MIT-1-ov-file)](LICENSE) file for details.
 
 ---
 
