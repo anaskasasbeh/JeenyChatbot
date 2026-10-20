@@ -1,7 +1,6 @@
-"""The LLM agent: understands the message and calls one of three tools.
+"""The LLM agent: understands the message and calls one of the ride tools.
 
-Built with LangChain's `create_agent` (the replacement for the removed
-`initialize_agent`). The model reads the user's message and fills the tool
+Built with LangChain's `create_agent`. The model reads the user's message and fills the tool
 arguments itself (pickup, destination, car type), so one model call is usually
 enough. Tools are `return_direct`, so the tool's reply ends the turn without a
 second "summarize the result" call.

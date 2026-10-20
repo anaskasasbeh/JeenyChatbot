@@ -53,7 +53,7 @@ def book():
 @pytest.mark.parametrize(
     "query, expected_name, source",
     [
-        # The old substring matcher sent these three to the wrong place.
+        # A substring matcher would send these three to the wrong place.
         ("الجامعة الأردنية", "الجامعة الأردنية", "landmark"),
         ("تاج مول", "تاج مول", "landmark"),
         ("مكة مول", "مكة مول", "landmark"),

@@ -45,8 +45,8 @@ MAX_ROUTE_POINTS = 1500  # enough for a smooth line on the map, small enough to 
 def downsample(points: list[tuple[float, float]], max_points: int = MAX_ROUTE_POINTS) -> list[tuple[float, float]]:
     """Keep every n-th point (and always the last one) so long routes stay light.
 
-    Bug fixed here: a full Irbid -> Aqaba route has thousands of points; the old code rejected it
-    and silently fell back to a straight line.
+    A full Irbid -> Aqaba route has thousands of points: more than the response allows, which
+    would otherwise end in a straight-line estimate instead of the real road.
     """
     if len(points) <= max_points:
         return points

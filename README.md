@@ -75,7 +75,6 @@ Only numbers from real runs are reported here.
 | Understanding, **rule-based mode** (no AI) | **88.0%** exact match (44/50) · action 96.0% (48/50) · places 88.2% (30/34) · car type 93.1% (27/29) | `python scripts/evaluate.py --mode rules` |
 | Rule-based speed | p95 0.001 s per message | same run |
 | Automated tests | 119 passing | `python -m pytest` |
-| Original v1 on a fresh install | 0 of 2 entry points started | audit before the rebuild (removed LangChain API, missing packages) |
 
 The evaluation measures **language understanding** only: maps are faked during evaluation, so the score doesn't depend on OpenStreetMap coverage or network speed. "Exact match" means the action, pickup, destination and car type are all right. An empty pickup and "my location" count as the same answer, because the app treats them the same way.
 
@@ -171,10 +170,6 @@ Without keys the app runs in rule-based mode and says so in the UI.
 - An optional extra place-search provider with better shop coverage.
 - A draggable pickup marker to correct an inaccurate location.
 - Streaming replies.
-
-## v1 → v2
-
-The first version (2025) used Gradio, OpenAI GPT-4o-mini, Google Maps APIs and LangChain's `initialize_agent`, which was later removed from LangChain; on a fresh install neither entry point started. Version 2 (2026) is a rebuild on the same idea: an agent with tools, a web UI with a live map, free and keyless map services, a rule-based fallback, tests and an evaluation set.
 
 ## License and credits
 

@@ -1,4 +1,4 @@
-"""The one and only fare formula (the old code had two that disagreed).
+"""The one fare formula, used by the planner, the trip panel and the replies alike.
 
 Prices are a simulated tariff for the demo, not real Jeeny prices.
 """

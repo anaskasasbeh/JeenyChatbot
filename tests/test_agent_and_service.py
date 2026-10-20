@@ -46,7 +46,7 @@ def test_default_car_is_not_named_in_the_reply(planner):
 
 
 def test_modified_destination_is_kept_for_next_turn(planner):
-    """Regression: the old sync_trip_data() restored the previous destination after a modification."""
+    """A modified destination must survive the next turns."""
     svc = ChatService(planner, [])
     first = svc.handle(ChatRequest(message="من اربد لعمان"))
     second = svc.handle(ChatRequest(message="غير الوجهة للسلط", trip=first.trip))

@@ -5,8 +5,8 @@ Lookup order (most trusted first):
 2. exact match on landmark names/aliases ("الجامعة الأردنية"),
 3. a strict fuzzy match for typos ("اليرموكك"), only for longer names.
 
-The old version used substring matching, so "الجامعة الأردنية" matched the saved
-place "الجامعة" (Yarmouk). Exact-then-strict-fuzzy matching fixes that.
+Exact-then-strict-fuzzy matching (not substring matching) keeps "الجامعة الأردنية"
+from matching the saved place "الجامعة", which is a different university.
 """
 
 from __future__ import annotations
