@@ -4,8 +4,7 @@
 
 > Independent demo project, inspired by ride-hailing apps such as Jeeny. **Not affiliated with Jeeny.** Prices and drivers are simulated.
 
-<!-- LIVE_DEMO: add the Vercel link here after deploying -->
-
+**Live demo:** [jeeny-chatbot.vercel.app](https://jeeny-chatbot.vercel.app/)
 ![JeenyChatbot on desktop](docs/assets/screenshot-desktop.png)
 
 ---
