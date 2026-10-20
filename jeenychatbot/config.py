@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 
-DEFAULT_USER_AGENT = "JeenyChatbot/2.0 (+https://github.com/anaskasasbeh/JeenyChatbot)"
+DEFAULT_USER_AGENT = "JeenyChatbot/1.0 (+https://github.com/anaskasasbeh/JeenyChatbot)"
 
 
 def _env(name: str, default: str = "") -> str:
