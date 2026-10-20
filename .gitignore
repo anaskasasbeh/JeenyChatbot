@@ -1,0 +1,27 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Tools / OS
+.vercel/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Generated output
+*.log
+maps/
+eval_results/

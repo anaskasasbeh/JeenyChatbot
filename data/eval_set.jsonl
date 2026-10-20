@@ -1,0 +1,50 @@
+{"id": 1, "text": "بدي أروح من إربد على عمان", "has_trip": false, "expected": {"action": "new_trip", "pickup": "اربد", "destination": "عمان", "car_type": null}}
+{"id": 2, "text": "من الزرقاء للجامعة الأردنية لو سمحت", "has_trip": false, "expected": {"action": "new_trip", "pickup": "الزرقاء", "destination": "الجامعة الأردنية", "car_type": null}}
+{"id": 3, "text": "وصلني من الدوار السابع لمطار الملكة علياء", "has_trip": false, "expected": {"action": "new_trip", "pickup": "الدوار السابع", "destination": "مطار الملكة علياء", "car_type": null}}
+{"id": 4, "text": "بدي تكسي من وسط البلد لتاج مول", "has_trip": false, "expected": {"action": "new_trip", "pickup": "وسط البلد", "destination": "تاج مول", "car_type": "taxi"}}
+{"id": 5, "text": "بدنا سيارة عائلية من السلط لعجلون، احنا ستة", "has_trip": false, "expected": {"action": "new_trip", "pickup": "السلط", "destination": "عجلون", "car_type": "family"}}
+{"id": 6, "text": "احجزلي VIP من العبدلي للمطار", "has_trip": false, "expected": {"action": "new_trip", "pickup": "العبدلي", "destination": "المطار", "car_type": "vip"}}
+{"id": 7, "text": "كم بتكلف الرحلة من اربد لجرش؟", "has_trip": false, "expected": {"action": "new_trip", "pickup": "اربد", "destination": "جرش", "car_type": null}}
+{"id": 8, "text": "رايح من التكنو عالرمثا", "has_trip": false, "expected": {"action": "new_trip", "pickup": "التكنو", "destination": "الرمثا", "car_type": null}}
+{"id": 9, "text": "خذني عالدار", "has_trip": false, "expected": {"action": "new_trip", "pickup": null, "destination": "الدار", "car_type": null}}
+{"id": 10, "text": "بدي اروح عالشغل من الجامعة", "has_trip": false, "expected": {"action": "new_trip", "pickup": "الجامعة", "destination": "الشغل", "car_type": null}}
+{"id": 11, "text": "مساء الخير، بدي انطلق من اليرموك لمادبا", "has_trip": false, "expected": {"action": "new_trip", "pickup": "اليرموك", "destination": "مادبا", "car_type": null}}
+{"id": 12, "text": "صباح الخير بدي سيارة فخمة من عبدون للبحر الميت", "has_trip": false, "expected": {"action": "new_trip", "pickup": "عبدون", "destination": "البحر الميت", "car_type": "vip"}}
+{"id": 13, "text": "ودّيني على سيتي مول من الصويفية", "has_trip": false, "expected": {"action": "new_trip", "pickup": "الصويفية", "destination": "سيتي مول", "car_type": null}}
+{"id": 14, "text": "بدي سيارة 7 ركاب من المفرق لإربد", "has_trip": false, "expected": {"action": "new_trip", "pickup": "المفرق", "destination": "اربد", "car_type": "family"}}
+{"id": 15, "text": "من الكرك للعقبة بسيارة عادية", "has_trip": false, "expected": {"action": "new_trip", "pickup": "الكرك", "destination": "العقبة", "car_type": "economy"}}
+{"id": 16, "text": "I need a ride from Irbid to Amman", "has_trip": false, "expected": {"action": "new_trip", "pickup": "Irbid", "destination": "Amman", "car_type": null}}
+{"id": 17, "text": "Book a taxi from Abdali to the airport", "has_trip": false, "expected": {"action": "new_trip", "pickup": "Abdali", "destination": "the airport", "car_type": "taxi"}}
+{"id": 18, "text": "How much is a VIP ride from Rainbow Street to Taj Mall?", "has_trip": false, "expected": {"action": "new_trip", "pickup": "Rainbow Street", "destination": "Taj Mall", "car_type": "vip"}}
+{"id": 19, "text": "take me home", "has_trip": false, "expected": {"action": "new_trip", "pickup": null, "destination": "home", "car_type": null}}
+{"id": 20, "text": "family car from Zarqa to Jerash please", "has_trip": false, "expected": {"action": "new_trip", "pickup": "Zarqa", "destination": "Jerash", "car_type": "family"}}
+{"id": 21, "text": "بدي اروح على مستشفى الملك المؤسس من الرمثا", "has_trip": false, "expected": {"action": "new_trip", "pickup": "الرمثا", "destination": "مستشفى الملك المؤسس", "car_type": null}}
+{"id": 22, "text": "من موقعي لمكة مول", "has_trip": false, "has_location": true, "expected": {"action": "new_trip", "pickup": "موقعي", "destination": "مكة مول", "car_type": null}}
+{"id": 23, "text": "ممكن توصلني لوادي رم من العقبة؟", "has_trip": false, "expected": {"action": "new_trip", "pickup": "العقبة", "destination": "وادي رم", "car_type": null}}
+{"id": 24, "text": "من البلد للقلعة", "has_trip": false, "expected": {"action": "new_trip", "pickup": "البلد", "destination": "القلعة", "car_type": null}}
+{"id": 25, "text": "غير الوجهة للسلط", "has_trip": true, "expected": {"action": "modify_trip", "pickup": null, "destination": "السلط", "car_type": null}}
+{"id": 26, "text": "لا لا، خلي الوجهة الزرقاء بدل عمان", "has_trip": true, "expected": {"action": "modify_trip", "pickup": null, "destination": "الزرقاء", "car_type": null}}
+{"id": 27, "text": "غير نقطة الانطلاق للجامعة الأردنية", "has_trip": true, "expected": {"action": "modify_trip", "pickup": "الجامعة الأردنية", "destination": null, "car_type": null}}
+{"id": 28, "text": "بدي أعدل الرحلة لتصير من مادبا للمطار", "has_trip": true, "expected": {"action": "modify_trip", "pickup": "مادبا", "destination": "المطار", "car_type": null}}
+{"id": 29, "text": "خليها VIP", "has_trip": true, "expected": {"action": "change_car", "pickup": null, "destination": null, "car_type": "vip"}}
+{"id": 30, "text": "غير السيارة لتاكسي", "has_trip": true, "expected": {"action": "change_car", "pickup": null, "destination": null, "car_type": "taxi"}}
+{"id": 31, "text": "احنا صرنا 6 بدنا سيارة أكبر", "has_trip": true, "expected": {"action": "change_car", "pickup": null, "destination": null, "car_type": "family"}}
+{"id": 32, "text": "بدي سيارة عادية بدل الفخمة", "has_trip": true, "expected": {"action": "change_car", "pickup": null, "destination": null, "car_type": "economy"}}
+{"id": 33, "text": "change the destination to Salt", "has_trip": true, "expected": {"action": "modify_trip", "pickup": null, "destination": "Salt", "car_type": null}}
+{"id": 34, "text": "make it a taxi", "has_trip": true, "expected": {"action": "change_car", "pickup": null, "destination": null, "car_type": "taxi"}}
+{"id": 35, "text": "actually pick me up from the University of Jordan", "has_trip": true, "expected": {"action": "modify_trip", "pickup": "University of Jordan", "destination": null, "car_type": null}}
+{"id": 36, "text": "مرحبا", "has_trip": false, "expected": {"action": "message", "pickup": null, "destination": null, "car_type": null}}
+{"id": 37, "text": "شو بتقدر تعمل؟", "has_trip": false, "expected": {"action": "message", "pickup": null, "destination": null, "car_type": null}}
+{"id": 38, "text": "شكرا كتير", "has_trip": true, "expected": {"action": "message", "pickup": null, "destination": null, "car_type": null}}
+{"id": 39, "text": "who built you?", "has_trip": false, "expected": {"action": "message", "pickup": null, "destination": null, "car_type": null}}
+{"id": 40, "text": "بدي اروح", "has_trip": false, "expected": {"action": "message", "pickup": null, "destination": null, "car_type": null}}
+{"id": 41, "text": "Hello!", "has_trip": false, "expected": {"action": "message", "pickup": null, "destination": null, "car_type": null}}
+{"id": 42, "text": "أكد الطلب", "has_trip": true, "expected": {"action": "confirm", "pickup": null, "destination": null, "car_type": null}}
+{"id": 43, "text": "تمام اطلبها", "has_trip": true, "expected": {"action": "confirm", "pickup": null, "destination": null, "car_type": null}}
+{"id": 44, "text": "الغي الرحلة", "has_trip": true, "expected": {"action": "cancel", "pickup": null, "destination": null, "car_type": null}}
+{"id": 45, "text": "بدي تاخذني من موقعي", "has_trip": true, "has_location": true, "expected": {"action": "modify_trip", "pickup": "موقعي", "destination": null, "car_type": null}}
+{"id": 46, "text": "خليها من الدوار السابع", "has_trip": true, "expected": {"action": "modify_trip", "pickup": "الدوار السابع", "destination": null, "car_type": null}}
+{"id": 47, "text": "بدي اغير الوجهة للبزنس بارك", "has_trip": true, "expected": {"action": "modify_trip", "pickup": null, "destination": "مجمع الملك حسين للأعمال", "car_type": null}}
+{"id": 48, "text": "Cancel my ride please", "has_trip": true, "expected": {"action": "cancel", "pickup": null, "destination": null, "car_type": null}}
+{"id": 49, "text": "yes, book it", "has_trip": true, "expected": {"action": "confirm", "pickup": null, "destination": null, "car_type": null}}
+{"id": 50, "text": "اللي عند دوار الشعب", "has_trip": true, "expected": {"action": "modify_trip", "pickup": null, "destination": "دوار الشعب", "car_type": null}, "history": [{"role": "user", "content": "بدي اغير الوجهة للمول الجديد"}, {"role": "assistant", "content": "ما لقيت مكان اسمه «المول الجديد» بالأردن. جرّب اسم أوضح أو أقرب مَعلم."}]}

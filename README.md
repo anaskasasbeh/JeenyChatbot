@@ -1,177 +1,185 @@
-# 🚗 JeenyChatbot
+# JeenyChatbot
 
-JeenyChatbot is an intelligent, fully interactive transportation assistant designed specifically for Arabic speakers in Jordan. Built using cutting-edge technologies such as LangChain, OpenAI GPT-4-mini, and Gradio, this application provides a smart, seamless, and engaging user experience similar to popular ride-hailing services like Uber, Careem, and Jeeny.
+**A ride-booking assistant for Jordan that understands Jordanian Arabic (and English), plans the trip on a real map, and lets you confirm it — by text or voice.**
 
-## 🌟 Key Features
+> Independent demo project, inspired by ride-hailing apps such as Jeeny. **Not affiliated with Jeeny.** Prices and drivers are simulated.
 
-### 🗣️ Intelligent Chatbot Interaction
+<!-- LIVE_DEMO: add the Vercel link here after deploying -->
 
-* **Natural Language Processing (NLP)** powered by OpenAI's GPT-4-mini.
-* Understands and processes user input in Jordanian Arabic dialect.
-* Capable of dynamic conversational interactions, asking clarifying questions when necessary.
+![JeenyChatbot on desktop](docs/assets/screenshot-desktop.png)
 
-### ⚙️ Agentic AI
+---
 
-* Leverages LangChain to intelligently select and switch between tools based on context.
-* Automatically manages ride details, location parsing, and car type selection.
+## The problem
 
-### 🎤 Multi-modal Input/Output
+Ride apps are built around forms: pick a pickup, pick a destination, pick a car. People don't talk like that. A user in Irbid says *"بدي أروح من الجامعة على البزنس بارك، وخليها VIP"* — and then changes their mind halfway: *"لا، خليها من موقعي"*.
 
-* Supports both text and voice interactions.
-* Advanced speech recognition and Text-to-Speech (TTS) capabilities optimized for Arabic.
-* Provides real-time voice interaction for enhanced accessibility.
+JeenyChatbot turns that kind of conversation into a real trip: it understands the dialect, remembers what was already said, finds the places on a map, draws the route along real roads, prices four car types, and only books after the user confirms.
 
-### 🧠 Memory Management
+## What it does
 
-* Persistent conversational memory retains essential details throughout the interaction.
-* Stores information such as vehicle preferences, current location, and destination.
+- **Understands Jordanian Arabic and English**, including nicknames and missing words ("البزنس بارك" → King Hussein Business Park), and keeps context across turns: change only the pickup, only the destination, or only the car.
+- **Plans real trips**: places from OpenStreetMap, routes along real roads (OSRM), distance, time and a fare for each car type (Economy, Taxi, Family, VIP).
+- **Confirms before booking**: the price is shown on the confirm button and said once the ride is confirmed; a simulated driver is then assigned.
+- **Handles missing places like a person would**: if a place isn't on the map it asks what's near it ("قريب من مجمع عمان") and places it there, or lets you pin it on the map. Partial matches are used but flagged: *"📍 اتأكد إن «…» هو المكان اللي بدك إياه"*.
+- **Your location as pickup**: asks the browser for your location when you say "من موقعي".
+- **Saved places** such as "الدار" or "الشغل", added by pinning on the map or with GPS (stored in your browser only).
+- **Voice input and spoken replies** (browser Web Speech API), Arabic UI with an English toggle, light/dark theme, mobile layout.
+- **Keeps working without AI**: if no LLM key is set, or the free tier is exhausted, a rule-based parser takes over.
 
-### 📍 Saved Locations Feature
+## How it works
 
-JeenyChatbot supports personalized saved locations that users can refer to using natural names. These locations are stored in the `saved_locations.json` file and are parsed intelligently by the agent during conversation.
-
-For example, you can say:
-
-- "خذني على الجامعة"
-- "غير الموقع لـ الدار"
-- "وصلني على الحديقة"
-
-Example saved locations:
-```json
-{
-  "الدار": "[removed]",
-  "دار جدي": "[removed]",
-  "الجامعة": "جامعة اليرموك،",
-  "المستشفى": "مستشفى الملك المؤسس عبد الله الجامعي"
-}
+```mermaid
+flowchart LR
+    U["User: text or voice"] --> UI["Web UI: chat + Leaflet map"]
+    UI -->|"POST /api/chat"| API["FastAPI"]
+    API --> AG{"LLM agent (LangChain)"}
+    AG -->|"Groq gpt-oss-120b, fallback Gemini"| TOOLS["Tools: request_trip, modify_trip, change_car_type, confirm_trip, cancel_trip, place_near"]
+    AG -.->|"no key or outage"| RULES["Rule-based parser"]
+    RULES --> TOOLS
+    TOOLS --> PLAN["Trip planner"]
+    PLAN --> BOOK["Saved places + built-in landmarks"]
+    PLAN --> GEO["Geocoding: Nominatim, then Photon + relevance check"]
+    PLAN --> ROUTE["Routing: OSRM (2 servers), else straight-line estimate"]
+    PLAN --> FARE["Fares for 4 car types"]
+    PLAN --> API
+    API --> UI
 ```
 
-### 🗺️ Interactive Maps & Dynamic Routing
+1. The browser sends the message plus the current trip, saved places and (if shared) the user's location. The server keeps no session state, which suits serverless hosting.
+2. The agent reads the message and calls **one tool** with the details it understood (pickup, destination, car type, and the place's official name as a search hint). Tools return their reply directly, so a turn usually needs a single model call.
+3. The trip planner resolves places (saved places → built-in landmarks → OpenStreetMap search near the user), checks that the map result really matches what was asked, routes the trip and prices it.
+4. Buttons on the trip panel (car type, confirm, cancel, use my location, pin on map) call the planner directly — no LLM call, instant.
 
-* Utilizes Google Maps APIs to generate detailed trip summaries, route planning, and driver tracking.
-* Interactive maps are dynamically generated using Folium, displaying trip details clearly.
+## Tech stack
 
-### 🚘 Car Type Customization
+| Layer | Tools |
+|---|---|
+| Language understanding | LangChain 1.x `create_agent` with tool calling and model fallback; Groq (`openai/gpt-oss-120b`) and Google Gemini through OpenAI-compatible APIs; rule-based fallback with regex + fuzzy matching (rapidfuzz) |
+| Backend | Python 3.11+, FastAPI, Pydantic v2, httpx |
+| Maps | OpenStreetMap: Nominatim and Photon (geocoding), OSRM (routing), OSM tiles; Leaflet in the browser |
+| Frontend | Plain HTML/CSS/JavaScript (no build step), Web Speech API, RTL/LTR i18n |
+| Quality | pytest (offline: fake LLM, fake maps), an evaluation script with a 50-message test set |
+| Deployment | Vercel (zero-config FastAPI) — free tier, no credit card |
 
-* Allows users to choose from multiple vehicle types:
+Everything runs on free tiers without a credit card.
 
-  * **Regular (عادية)**
-  * **Taxi (تاكسي)**
-  * **Family-sized (عائلية)**
-  * **VIP (فاخرة)**
-* Pricing dynamically adjusts based on vehicle choice.
+## Results
 
-### 🔄 Flexible Trip Modifications
+Only numbers from real runs are reported here.
 
-* Enables users to modify trip details, including changing the vehicle type, start location, or destination seamlessly.
-* Real-time recalculation of trip costs and timings.
+| What | Result | How it was measured |
+|---|---|---|
+| Understanding, **AI mode** (Groq `openai/gpt-oss-120b`) | **94.0%** exact match (47/50) · action 98.0% (49/50) · places 91.2% (31/34) · car type 100% (29/29) | `python scripts/evaluate.py --mode ai` on `data/eval_set.jsonl`, after error analysis (see below) |
+| AI mode speed | median 1.08 s · p95 3.30 s per message · 1.0 model call per message | same run (Groq free tier, called from a PC in Jordan) |
+| Understanding, **rule-based mode** (no AI) | **88.0%** exact match (44/50) · action 96.0% (48/50) · places 88.2% (30/34) · car type 93.1% (27/29) | `python scripts/evaluate.py --mode rules` |
+| Rule-based speed | p95 0.001 s per message | same run |
+| Automated tests | 119 passing | `python -m pytest` |
+| Original v1 on a fresh install | 0 of 2 entry points started | audit before the rebuild (removed LangChain API, missing packages) |
 
-### 💻 User-Friendly Interface
+The evaluation measures **language understanding** only: maps are faked during evaluation, so the score doesn't depend on OpenStreetMap coverage or network speed. "Exact match" means the action, pickup, destination and car type are all right. An empty pickup and "my location" count as the same answer, because the app treats them the same way.
 
-* Elegant, responsive, and intuitive user interface powered by Gradio.
-* Easy-to-use interface with clear interaction design for broader audience accessibility.
+**Error analysis.** The first AI run scored 86.0% exact match (43/50; places 79.4%). Reading the seven misses showed:
+- a tool that the prompt mentioned but the request didn't include, so the provider rejected the call;
+- the model shortening "الجامعة الأردنية" to "الجامعة", which is also the name of a saved place (a different university);
+- role words such as "الوجهة" left inside place names;
+- a scoring rule that counted "my location" and an empty pickup as different answers.
 
-## 📂 Project Structure
+After fixing these, the second run scored 94.0%. Because the fixes came from this same set, it is a development set rather than a held-out test. The remaining misses are small spelling slips by the model (عبدون → عبدن, الرمثا → الرمثة) and one reply in text where a tool call was expected; LLM output also varies from run to run.
 
-```markdown
+Example routes from real runs (OSRM): Irbid → Amman 95.1 km / 72 min · Irbid → Queen Alia Airport 122.7 km / 106 min.
+
+### Evaluation data (sample)
+
+50 hand-written messages (38 in Jordanian Arabic, 12 in English): 24 new trips, 10 changes to an existing trip ("غير الوجهة للبزنس بارك"), 5 car-type changes ("خليها VIP"), 3 confirmations, 2 cancellations and 6 other messages (greetings, questions).
+
+| id | message | expected action | pickup | destination | car |
+|---|---|---|---|---|---|
+| 1 | بدي أروح من إربد على عمان | new_trip | اربد | عمان | – |
+| 3 | وصلني من الدوار السابع لمطار الملكة علياء | new_trip | الدوار السابع | مطار الملكة علياء | – |
+| 4 | بدي تكسي من وسط البلد لتاج مول | new_trip | وسط البلد | تاج مول | taxi |
+| 5 | بدنا سيارة عائلية من السلط لعجلون، احنا ستة | new_trip | السلط | عجلون | family |
+| 6 | احجزلي VIP من العبدلي للمطار | new_trip | العبدلي | المطار | vip |
+
+## Project structure
+
+```
 JeenyChatbot/
-├── backend/
-│   ├── tools/
-│   │   ├── car_type_selector_tool.py
-│   │   ├── change_car_type_tool.py
-│   │   ├── get_directions_tool.py
-│   │   └── modify_location_tool.py
-│   ├── jeeny_agent/
-│   │   ├── driver.py
-│   │   ├── geocoding.py
-│   │   ├── mapping.py
-│   │   ├── models.py
-│   │   ├── nlu.py
-│   │   └── routing.py
-│   ├── utils/
-│   │   └── voice.py
-│   ├── main.py
-│   └── saved_locations.json
-│
-├── frontend/
-│   └── gradio_app.py
-│
-├── maps/ (generated maps)
-│
-├── requirements.txt
-├── .env.example
-└── README.md
+├── app.py                  # entry point (Vercel and uvicorn)
+├── jeenychatbot/
+│   ├── api.py              # FastAPI routes, rate limiting
+│   ├── service.py          # one chat turn: agent first, rules as fallback
+│   ├── agent.py            # LangChain agent, system prompt, tools
+│   ├── actions.py          # what the assistant can do (shared by AI, rules and UI buttons)
+│   ├── trips.py            # resolve places, route, price, confirm
+│   ├── geocoding.py        # Nominatim + Photon, relevance check, cache
+│   ├── routing.py          # OSRM with a second server and an estimate fallback
+│   ├── fallback_parser.py  # rule-based understanding
+│   ├── places.py, text.py  # landmarks, saved places, Arabic normalization
+│   ├── pricing.py, driver.py, messages.py, models.py, llm.py, config.py, cli.py
+├── public/                 # web UI: index.html, app.js, i18n.js, styles.css, Leaflet
+├── data/
+│   ├── places.json         # built-in landmarks (cities, universities, malls, airports)
+│   └── eval_set.jsonl      # the 50-message evaluation set
+├── scripts/                # evaluate.py, check_llm.py, build_places.py
+├── tests/                  # pytest, fully offline
+├── requirements.txt, requirements-dev.txt, vercel.json, .env.example
 ```
 
-## 🛠️ Technologies Used
+## Run it locally
 
-* **LangChain**: For dynamic agent interactions and intelligent tool-switching.
-* **OpenAI GPT-4o**: Advanced NLP capabilities to understand Arabic dialect.
-* **Google Maps APIs**: Directions, Geocoding, and Road APIs for accurate navigation and mapping.
-* **Gradio**: For intuitive, interactive web-based interface.
-* **Folium**: To create interactive maps displaying route details.
-* **SpeechRecognition, gTTS, pyttsx3**: For robust speech-to-text and text-to-speech functionalities.
-* **FastAPI & Uvicorn**: Future-ready backend structure (optional server deployment).
-
-## 🚀 Installation and Setup
-
-### Clone the Repository
+Requires Python 3.11 or newer.
 
 ```bash
-git clone https://github.com/your_username/JeenyChatbot.git
+git clone https://github.com/anaskasasbeh/JeenyChatbot.git
 cd JeenyChatbot
+python -m venv .venv
+source .venv/Scripts/activate        # Windows (Git Bash). macOS/Linux: source .venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env                 # optional: add a free Groq key (see below)
+python -m pytest                     # all tests run offline
+uvicorn app:app --reload             # open http://127.0.0.1:8000
 ```
 
-### Install Dependencies
+Terminal chat instead of the web UI: `python -m jeenychatbot` (add `--rules` to skip the LLM).
 
-```bash
-pip install -r requirements.txt
-```
+**AI keys (optional, free, no credit card):**
+- Groq → https://console.groq.com/keys → put it in `LLM_API_KEY`
+- Google AI Studio (fallback) → https://aistudio.google.com/apikey → `FALLBACK_LLM_API_KEY`
+- Check them with `python scripts/check_llm.py`
 
-### Configure Environment Variables
+Without keys the app runs in rule-based mode and says so in the UI.
 
-* Rename `.env.example` to `.env` and replace with your actual API keys:
+## Deploy (Vercel)
 
-```env
-OPENAI_API_KEY=your_openai_api_key
-GOOGLE_API_KEY=your_google_api_key
-```
+1. Import the GitHub repository at https://vercel.com/new (framework is detected automatically).
+2. Add the environment variables from `.env.example` (at least `LLM_API_KEY`) in the project settings.
+3. Deploy. `public/` is served by Vercel's CDN; `app.py` runs as a Python function.
 
-### Run the Application
+## Limitations
 
-To launch the Gradio-based user interface:
+- **Map coverage**: OpenStreetMap is free but has fewer shops and malls than Google Maps. Missing places are handled by asking what's near them or by pinning them on the map.
+- **Public map servers**: Nominatim allows about one request per second and the public OSRM servers are for light use — fine for a demo, not for production traffic.
+- **Simulated booking**: fares follow a made-up tariff, and drivers are generated near the pickup.
+- **Small evaluation set**: 50 messages written by the developer; real user messages would be more varied.
+- **Voice** depends on the browser's speech recognition (best in Chrome and Edge); laptop location is approximate.
+- **Rate limiting** is kept in memory, so separate serverless instances don't share it.
 
-```bash
-python frontend/gradio_app.py
-```
+## Future work
 
-To run via CLI with optional voice commands:
+- A larger evaluation set built from real, anonymized conversations.
+- An optional extra place-search provider with better shop coverage.
+- A draggable pickup marker to correct an inaccurate location.
+- Streaming replies.
 
-```bash
-python backend/main.py --use-voice
-```
+## v1 → v2
 
-## 🧑‍💻 Usage Examples
+The first version (2025) used Gradio, OpenAI GPT-4o-mini, Google Maps APIs and LangChain's `initialize_agent`, which was later removed from LangChain; on a fresh install neither entry point started. Version 2 (2026) is a rebuild on the same idea: an agent with tools, a web UI with a live map, free and keyless map services, a rule-based fallback, tests and an evaluation set.
 
-* "بدي أروح من إربد إلى عمان"
-* "غير نوع السيارة لـ VIP"
-* "بدي أعدل الرحلة لتصير من الزرقاء إلى السلط"
-* "غير الوجهة للجامعة الأردنية"
+## License and credits
 
-## 🌐 Contribution
+MIT License — see [LICENSE](LICENSE).
 
-Contributions are welcome! Please fork the repository, create your branch, commit your changes, and open a pull request.
+Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors. Routing by [OSRM](https://project-osrm.org/). Map display by [Leaflet](https://leafletjs.com/).
 
-## 📜 License
-
-This project is licensed under the MIT License. See the [MIT LICENSE](https://github.com/anaskasasbeh28/JeenyChatbot/blob/main/LICENSE) file for details.
-
-
----
-
-✨ **Happy coding!** Feel free to reach out or raise issues for feedback, questions, or feature requests! 🚗💨🎉
-
----
-
-> Made with ❤️ and a lot of Tea by **Anas & Cloude** ☁️
-
+Built by **Anas Kasasbeh** — AI Engineer, Jordan · [LinkedIn](https://www.linkedin.com/in/anaskasasbeh)
