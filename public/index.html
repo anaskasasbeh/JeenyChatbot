@@ -17,7 +17,7 @@
     (function () {
       var theme = null;
       try { theme = JSON.parse(localStorage.getItem("jc.theme")); } catch (e) {}
-      if (!theme) theme = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      if (!theme) theme = "light"; // light by default; the moon button switches it and is remembered
       document.documentElement.setAttribute("data-theme", theme);
     })();
   </script>
