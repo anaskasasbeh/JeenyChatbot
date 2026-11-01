@@ -4,7 +4,8 @@
 
 > Independent demo project, inspired by ride-hailing apps such as Jeeny. **Not affiliated with Jeeny.** Prices and drivers are simulated.
 
-**Live demo:** [jeeny-chatbot.vercel.app](https://jeeny-chatbot.vercel.app/)
+**Live demo:** [jeeny-chatbot.onrender.com](https://jeeny-chatbot.onrender.com/) — free hosting: after a quiet period, the first visit can take about a minute while the server wakes up.
+
 ![JeenyChatbot on desktop](docs/assets/screenshot-desktop.png)
 
 ---
@@ -45,7 +46,7 @@ flowchart LR
     API --> UI
 ```
 
-1. The browser sends the message plus the current trip, saved places and (if shared) the user's location. The server keeps no session state, which suits serverless hosting.
+1. The browser sends the message plus the current trip, saved places and (if shared) the user's location. The server keeps no session state, so it can restart or go to sleep without losing a conversation.
 2. The agent reads the message and calls **one tool** with the details it understood (pickup, destination, car type, and the place's official name as a search hint). Tools return their reply directly, so a turn usually needs a single model call.
 3. The trip planner resolves places (saved places → built-in landmarks → OpenStreetMap search near the user), checks that the map result really matches what was asked, routes the trip and prices it.
 4. Buttons on the trip panel (car type, confirm, cancel, use my location, pin on map) call the planner directly — no LLM call, instant.
@@ -59,9 +60,9 @@ flowchart LR
 | Maps | OpenStreetMap: Nominatim and Photon (geocoding), OSRM (routing), OSM tiles; Leaflet in the browser |
 | Frontend | Plain HTML/CSS/JavaScript (no build step), Web Speech API, RTL/LTR i18n |
 | Quality | pytest (offline: fake LLM, fake maps), an evaluation script with a 50-message test set |
-| Deployment | Vercel (zero-config FastAPI) — free tier, no credit card |
+| Deployment | Render free web service from a `render.yaml` Blueprint: one FastAPI server serves the API and the web UI |
 
-Everything runs on free tiers without a credit card.
+Everything runs on free tiers.
 
 ## Results
 
@@ -73,7 +74,7 @@ Only numbers from real runs are reported here.
 | AI mode speed | median 1.08 s · p95 3.30 s per message · 1.0 model call per message | same run (Groq free tier, called from a PC in Jordan) |
 | Understanding, **rule-based mode** (no AI) | **88.0%** exact match (44/50) · action 96.0% (48/50) · places 88.2% (30/34) · car type 93.1% (27/29) | `python scripts/evaluate.py --mode rules` |
 | Rule-based speed | p95 0.001 s per message | same run |
-| Automated tests | 119 passing | `python -m pytest` |
+| Automated tests | 120 passing | `python -m pytest` |
 
 The evaluation measures **language understanding** only: maps are faked during evaluation, so the score doesn't depend on OpenStreetMap coverage or network speed. "Exact match" means the action, pickup, destination and car type are all right. An empty pickup and "my location" count as the same answer, because the app treats them the same way.
 
@@ -103,9 +104,9 @@ Example routes from real runs (OSRM): Irbid → Amman 95.1 km / 72 min · Irbid 
 
 ```
 JeenyChatbot/
-├── app.py                  # entry point (Vercel and uvicorn)
+├── app.py                  # entry point for uvicorn (locally and on Render)
 ├── jeenychatbot/
-│   ├── api.py              # FastAPI routes, rate limiting
+│   ├── api.py              # FastAPI routes, web UI, security headers, rate limiting
 │   ├── service.py          # one chat turn: agent first, rules as fallback
 │   ├── agent.py            # LangChain agent, system prompt, tools
 │   ├── actions.py          # what the assistant can do (shared by AI, rules and UI buttons)
@@ -121,7 +122,7 @@ JeenyChatbot/
 │   └── eval_set.jsonl      # the 50-message evaluation set
 ├── scripts/                # evaluate.py, check_llm.py, build_places.py
 ├── tests/                  # pytest, fully offline
-├── requirements.txt, requirements-dev.txt, vercel.json, .env.example
+├── requirements.txt, requirements-dev.txt, render.yaml, .python-version, .env.example
 ```
 
 ## Run it locally
@@ -148,11 +149,15 @@ Terminal chat instead of the web UI: `python -m jeenychatbot` (add `--rules` to 
 
 Without keys the app runs in rule-based mode and says so in the UI.
 
-## Deploy (Vercel)
+## Deploy (Render)
 
-1. Import the GitHub repository at https://vercel.com/new (framework is detected automatically).
-2. Add the environment variables from `.env.example` (at least `LLM_API_KEY`) in the project settings.
-3. Deploy. `public/` is served by Vercel's CDN; `app.py` runs as a Python function.
+`render.yaml` describes a free web service: `pip install -r requirements.txt`, then `uvicorn app:app --host 0.0.0.0 --port $PORT`, with `/api/health` as the health check. Python 3.12 comes from `.python-version`.
+
+1. In the Render Dashboard choose **New → Blueprint** and connect this GitHub repository.
+2. When asked, paste your Groq key into `LLM_API_KEY` (and optionally a Gemini key into `FALLBACK_LLM_API_KEY`). The other settings have working defaults.
+3. Deploy, then open `/api/health` on the service URL: `"mode": "ai"` means the AI is connected.
+
+On the free plan the service sleeps after 15 minutes without traffic, and the next request wakes it in about a minute (Render shows a loading page meanwhile). The web UI retries its requests while the server wakes up.
 
 ## Limitations
 
@@ -161,7 +166,8 @@ Without keys the app runs in rule-based mode and says so in the UI.
 - **Simulated booking**: fares follow a made-up tariff, and drivers are generated near the pickup.
 - **Small evaluation set**: 50 messages written by the developer; real user messages would be more varied.
 - **Voice** depends on the browser's speech recognition (best in Chrome and Edge); laptop location is approximate.
-- **Rate limiting** is kept in memory, so separate serverless instances don't share it.
+- **Free hosting sleeps**: after 15 minutes without visitors the server goes to sleep, and the next visit waits about a minute.
+- **Rate limiting** is kept in memory, so it resets whenever the server restarts or sleeps.
 
 ## Future work
 
