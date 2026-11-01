@@ -6,7 +6,7 @@
 
 **Live demo:** [jeeny-chatbot.onrender.com](https://jeeny-chatbot.onrender.com/) — free hosting: after a quiet period, the first visit can take about a minute while the server wakes up.
 
-![JeenyChatbot on desktop](docs/assets/screenshot-desktop.png)
+![JeenyChatbot on desktop and mobile](docs/assets/screenshot.png)
 
 ---
 
