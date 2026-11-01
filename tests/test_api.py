@@ -53,3 +53,16 @@ def test_rate_limit(client, monkeypatch):
     monkeypatch.setattr(rate_limit, "per_minute", 2)
     codes = [client.post("/api/chat", json={"message": "مرحبا"}).status_code for _ in range(3)]
     assert codes == [200, 200, 429]
+
+
+def test_the_server_serves_the_web_ui_with_security_headers(client):
+    """On Render one long-running server serves both the API and public/ (no CDN in front)."""
+    page = client.get("/")
+    assert page.status_code == 200 and "text/html" in page.headers["content-type"]
+    assert '<script src="app.js"></script>' in page.text
+    assert client.get("/app.js").status_code == 200
+    assert client.get("/vendor/leaflet/leaflet.js").status_code == 200
+    for response in (page, client.get("/api/health")):
+        assert response.headers["x-content-type-options"] == "nosniff"
+        assert response.headers["x-frame-options"] == "DENY"
+        assert "geolocation=(self)" in response.headers["permissions-policy"]

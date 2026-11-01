@@ -1,9 +1,8 @@
-"""FastAPI web API. On Vercel the `public/` folder is served by the CDN; locally we mount it here."""
+"""FastAPI web app: the JSON API under /api and the web UI from public/, served by one long-running server."""
 
 from __future__ import annotations
 
 import logging
-import os
 import threading
 import time
 from collections import defaultdict, deque
@@ -31,6 +30,23 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     redoc_url=None,
 )
+
+
+# Security headers for every response (pages, files and API).
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Frame-Options": "DENY",
+    "Permissions-Policy": "microphone=(self), geolocation=(self), camera=()",
+}
+
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    for name, value in SECURITY_HEADERS.items():
+        response.headers.setdefault(name, value)
+    return response
 
 
 @lru_cache(maxsize=1)
@@ -104,6 +120,6 @@ def trip_action(req: TripActionRequest, service: ChatService = Depends(get_servi
     return service.trip_action(req)
 
 
-# Local development only: Vercel serves public/ from its CDN and must not mount it.
-if not os.getenv("VERCEL") and PUBLIC_DIR.is_dir():
+# The web UI (index.html, app.js, styles, Leaflet). Mounted last, so the /api routes above win.
+if PUBLIC_DIR.is_dir():
     app.mount("/", StaticFiles(directory=PUBLIC_DIR, html=True), name="public")

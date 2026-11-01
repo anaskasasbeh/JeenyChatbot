@@ -1,4 +1,4 @@
-"""Web entry point, auto-detected by Vercel. Run locally with: uvicorn app:app --reload"""
+"""Web entry point. Locally: uvicorn app:app --reload · On Render: see render.yaml."""
 
 from jeenychatbot.api import app
 
