@@ -1,0 +1,19 @@
+# Render Blueprint: one free web service that serves the API and the web UI.
+# Create it in the Render Dashboard with New -> Blueprint and pick this repository.
+services:
+  - type: web
+    name: jeeny-chatbot            # the URL becomes https://jeeny-chatbot.onrender.com (if the name is free)
+    runtime: python                # version comes from .python-version (3.12)
+    plan: free                     # sleeps after 15 min without traffic; the next visit wakes it (about a minute)
+    region: frankfurt              # closest Render region to Jordan; can't be changed later
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit      # every push to main redeploys
+    envVars:
+      # Asked for once, when the Blueprint is created. Leave empty to run without AI (rule-based mode).
+      - key: LLM_API_KEY           # Groq key: https://console.groq.com/keys
+        sync: false
+      - key: FALLBACK_LLM_API_KEY  # optional Google AI Studio (Gemini) key
+        sync: false
+      # Everything else has a working default in jeenychatbot/config.py (see .env.example).
