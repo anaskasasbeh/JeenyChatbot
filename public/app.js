@@ -411,11 +411,39 @@
   }
 
   // -------------------------------------------------------------- network
-  async function postJSON(url, body) {
-    const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
-    if (res.status === 429) throw Object.assign(new Error("rate"), { kind: "error.rate" });
-    if (!res.ok) throw Object.assign(new Error("server"), { kind: "error.server" });
-    return res.json();
+  // The free Render server sleeps after 15 quiet minutes. While it wakes up (about a minute) a request
+  // can get a loading page or a 502/503 instead of JSON: wait and try again instead of failing.
+  const WAKE_RETRY_MS = 5000;
+  const WAKE_MAX_TRIES = 15; // about 75 seconds
+  const NETWORK_MAX_TRIES = 3; // a dropped connection is retried briefly too
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  async function postJSON(url, body, onWaking) {
+    for (let attempt = 1; ; attempt++) {
+      let res = null;
+      try {
+        res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+      } catch (e) {
+        res = null;
+      }
+      if (res && res.status === 429) throw Object.assign(new Error("rate"), { kind: "error.rate" });
+      const isJSON = res && res.ok && (res.headers.get("content-type") || "").includes("application/json");
+      if (isJSON) return res.json();
+      const waking = !res || res.ok || res.status >= 502;
+      if (!waking || attempt >= (res ? WAKE_MAX_TRIES : NETWORK_MAX_TRIES)) {
+        throw Object.assign(new Error("server"), { kind: res ? "error.server" : "error.network" });
+      }
+      if (onWaking) onWaking();
+      await sleep(WAKE_RETRY_MS);
+    }
+  }
+
+  // Shown under the typing dots when an answer takes long (usually: the free server is waking up).
+  const SLOW_NOTE_MS = 8000;
+  function showWakeNote(typing) {
+    if (!typing.isConnected || typing.querySelector(".wake-note")) return;
+    typing.appendChild(el("p", "wake-note", t("server.waking")));
+    scrollToEnd();
   }
 
   // The place the bot just couldn't find: the next message may say what's near it.
@@ -441,6 +469,7 @@
     if (!silent) addMessage({ role: "user", text: text });
     setBusy(true);
     const typing = showTyping();
+    const slowNote = setTimeout(() => showWakeNote(typing), SLOW_NOTE_MS);
     const ask = () =>
       postJSON(API.chat, {
         message: text,
@@ -450,7 +479,7 @@
         saved_places: savedPayload(),
         current_location: state.here,
         pending_pin: pending,
-      });
+      }, () => showWakeNote(typing));
     try {
       let data = await ask();
       if (data.need_location && !state.here) {
@@ -476,6 +505,7 @@
       typing.remove();
       addMessage({ role: "bot", text: t(err.kind || "error.network"), error: true });
     } finally {
+      clearTimeout(slowNote);
       setBusy(false);
     }
   }
